@@ -6,7 +6,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://YOUR-BACKEND-URL/signals')
+    fetch('https://tradesage-backend.onrender.com/signals')
       .then(response => response.json())
       .then(data => {
         setSignals(data.signals || []);

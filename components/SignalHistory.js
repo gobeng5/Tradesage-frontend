@@ -7,7 +7,7 @@ const SignalHistory = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🧠 Filters
+  // 🔍 Filters
   const [signalType, setSignalType] = useState("All");
   const [confidenceLevel, setConfidenceLevel] = useState("All");
   const [pair, setPair] = useState("All");
@@ -64,9 +64,9 @@ const SignalHistory = () => {
 
   return (
     <div className="signal-history">
-      <h2>🧠 Filtered Signal History</h2>
+      <h2>📊 Signal History & Outcome</h2>
 
-      {/* 🔎 Filter Controls */}
+      {/* 🔎 Filters */}
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <select value={signalType} onChange={(e) => setSignalType(e.target.value)}>
           <option value="All">All Signals</option>
@@ -109,6 +109,7 @@ const SignalHistory = () => {
                 <p><strong>Indicators:</strong> {item.indicators.join(", ")}</p>
                 <p><strong>Confirmations:</strong> {item.confirmations.join(", ")}</p>
                 <p><strong>Logged At:</strong> {new Date(item.logged_at).toLocaleString()}</p>
+                <p><strong>Outcome:</strong> {item.outcome || "⏳ Pending Backtest"}</p>
               </div>
             </div>
           ))}

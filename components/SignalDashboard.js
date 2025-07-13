@@ -18,8 +18,12 @@ const SignalDashboard = () => {
   }, []);
 
   const fetchSignals = async () => {
-    const res = await axios.get("https://tradesage-backend.onrender.com/signals");
-    setSignals(res.data.signals || []);
+    try {
+      const res = await axios.get("https://tradesage-backend.onrender.com/signals");
+      setSignals(res.data.signals || []);
+    } catch (err) {
+      console.error("Failed to fetch signals:", err);
+    }
   };
 
   const getBadge = (type) => (
@@ -27,48 +31,76 @@ const SignalDashboard = () => {
       backgroundColor: TRADE_COLORS[type] || "#7f8c8d",
       color: "#fff",
       padding: "4px 8px",
-      borderRadius: "4px"
+      borderRadius: "4px",
+      fontSize: "0.9rem",
+      fontWeight: "bold"
     }}>{type}</span>
   );
 
-  const filtered = signals
+  const filteredSignals = signals
     .filter(s => selectedPair === "" || s.pair === selectedPair)
     .sort((a, b) => b[sortKey] - a[sortKey]);
 
   return (
     <div className="dashboard">
-      <h2>📈 Multi-Timeframe Signals</h2>
+      <h2>📈 TradeSage FX: Multi-Timeframe Signals</h2>
 
       <div className="filter-bar">
-        <select onChange={e => setSelectedPair(e.target.value)}>
-          <option value="">All Pairs</option>
-          {Array.from(new Set(signals.map(s => s.pair))).map(pair => (
-            <option key={pair} value={pair}>{pair}</option>
-          ))}
-        </select>
+        <label>
+          Pair:
+          <select onChange={e => setSelectedPair(e.target.value)} value={selectedPair}>
+            <option value="">All Pairs</option>
+            {Array.from(new Set(signals.map(s => s.pair))).map(pair => (
+              <option key={pair} value={pair}>{pair}</option>
+            ))}
+          </select>
+        </label>
 
-        <select onChange={e => setSortKey(e.target.value)}>
-          <option value="confidence">Confidence</option>
-          <option value="timestamp">Timestamp</option>
-        </select>
+        <label>
+          Sort by:
+          <select onChange={e => setSortKey(e.target.value)} value={sortKey}>
+            <option value="confidence">Confidence</option>
+            <option value="timestamp">Timestamp</option>
+          </select>
+        </label>
       </div>
 
-      <div className="signal-grid">
-        {filtered.map((signal, idx) => (
-          <div key={idx} className="signal-card">
-            <h3>{signal.pair}</h3>
-            <p><strong>🧠 Confidence:</strong> {signal.confidence * 100}%</p>
-            <p><strong>📊 Strategy:</strong> {signal.strategy}</p>
-            <p><strong>📍 Entry:</strong> {signal.entry}</p>
-            <p><strong>🏁 TP:</strong> {signal.take_profit}</p>
-            <p><strong>🛑 SL:</strong> {signal.stop_loss}</p>
-            <p><strong>🔁 Outcome:</strong> {signal.outcome || "Pending"}</p>
-            <p><strong>🕒 Time:</strong> {signal.timestamp}</p>
-            <p><strong>📌 Bias:</strong> {signal.macro_bias}</p>
-            <p><strong>🏷 Type:</strong> {getBadge(signal.trade_type)}</p>
-          </div>
-        ))}
-      </div>
+      <table className="signal-table">
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Timeframe</th>
+            <th>Strategy</th>
+            <th>Type</th>
+            <th>Bias</th>
+            <th>Confidence</th>
+            <th>Entry</th>
+            <th>TP</th>
+            <th>SL</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredSignals.length === 0 ? (
+            <tr><td colSpan="10">⚠️ No signals found for current filter.</td></tr>
+          ) : (
+            filteredSignals.map((s, idx) => (
+              <tr key={idx}>
+                <td>{s.pair}</td>
+                <td>{s.timeframe}</td>
+                <td>{s.strategy}</td>
+                <td>{getBadge(s.trade_type)}</td>
+                <td>{s.macro_bias}</td>
+                <td>{(s.confidence * 100).toFixed(1)}%</td>
+                <td>{s.entry}</td>
+                <td>{s.take_profit}</td>
+                <td>{s.stop_loss}</td>
+                <td>{s.timestamp}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };

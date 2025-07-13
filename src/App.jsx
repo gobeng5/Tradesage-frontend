@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import './App.css';
 
 function App() {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://tradesage-backend.onrender.com/signals')
+    fetch('https://YOUR-BACKEND-URL/signals')
       .then(response => response.json())
       .then(data => {
         setSignals(data.signals || []);
@@ -19,14 +18,14 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: 'Arial' }}>
       <h1>TradeSage FX 📈</h1>
-      <p>High-probability trading signals</p>
+      <p>Smart trading signals in real-time</p>
 
       {loading ? (
         <p>Loading signals...</p>
       ) : (
-        <table>
+        <table style={{ margin: '20px auto', borderCollapse: 'collapse', width: '80%' }}>
           <thead>
             <tr>
               <th>Pair</th>

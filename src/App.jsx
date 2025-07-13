@@ -3,18 +3,27 @@ import React, { useEffect, useState } from 'react';
 function App() {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const fetchSignals = () => {
     fetch('https://tradesage-backend.onrender.com/signals')
       .then(response => response.json())
       .then(data => {
         setSignals(data.signals || []);
         setLoading(false);
+        setError(false);
       })
-      .catch(error => {
-        console.error('Error fetching signals:', error);
+      .catch(err => {
+        console.error('Error fetching signals:', err);
         setLoading(false);
+        setError(true);
       });
+  };
+
+  useEffect(() => {
+    fetchSignals(); // Initial fetch
+    const interval = setInterval(fetchSignals, 15 * 60 * 1000); // Every 15 mins
+    return () => clearInterval(interval); // Clean up
   }, []);
 
   return (
@@ -24,6 +33,10 @@ function App() {
 
       {loading ? (
         <p>Loading signals...</p>
+      ) : error ? (
+        <p style={{ color: 'red' }}>
+          Failed to load signals. Check backend status or try again later.
+        </p>
       ) : (
         <table style={{ margin: '20px auto', borderCollapse: 'collapse', width: '80%' }}>
           <thead>

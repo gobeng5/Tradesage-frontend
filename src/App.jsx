@@ -4,39 +4,64 @@ function App() {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [file, setFile] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchSignals = () => {
     fetch('https://tradesage-backend.onrender.com/signals')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         setSignals(data.signals || []);
         setLoading(false);
         setError(false);
       })
-      .catch(err => {
-        console.error('Error fetching signals:', err);
+      .catch(() => {
         setLoading(false);
         setError(true);
       });
   };
 
   useEffect(() => {
-    fetchSignals(); // Initial fetch
-    const interval = setInterval(fetchSignals, 15 * 60 * 1000); // Every 15 mins
-    return () => clearInterval(interval); // Clean up
+    fetchSignals();
+    const interval = setInterval(fetchSignals, 15 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: 'Arial' }}>
-      <h1>TradeSage FX 📈</h1>
-      <p>Smart trading signals in real-time</p>
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setAnalysis(null);
+  };
 
-      {loading ? (
-        <p>Loading signals...</p>
-      ) : error ? (
-        <p style={{ color: 'red' }}>
-          Failed to load signals. Check backend status or try again later.
-        </p>
+  const handleAnalyze = () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+    setUploading(true);
+
+    fetch('https://tradesage-backend.onrender.com/analyze', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        setAnalysis(data);
+        setUploading(false);
+      })
+      .catch(err => {
+        console.error('Error analyzing image:', err);
+        setUploading(false);
+      });
+  };
+
+  return (
+    <div style={{ textAlign: 'center', fontFamily: 'Arial', padding: '40px' }}>
+      <h1>TradeSage FX 📈</h1>
+      <p>Smart trading signals with screenshot intelligence</p>
+
+      {loading ? <p>Loading signals...</p> : error ? (
+        <p style={{ color: 'red' }}>Failed to load signals. Try again later.</p>
       ) : (
         <table style={{ margin: '20px auto', borderCollapse: 'collapse', width: '80%' }}>
           <thead>
@@ -49,8 +74,8 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {signals.map((s, index) => (
-              <tr key={index}>
+            {signals.map((s, i) => (
+              <tr key={i}>
                 <td>{s.pair}</td>
                 <td>{s.timeframe}</td>
                 <td>{s.strategy}</td>
@@ -60,6 +85,21 @@ function App() {
             ))}
           </tbody>
         </table>
+      )}
+
+      <hr style={{ margin: '40px 0' }} />
+      <h3>📤 Upload Screenshot for Analysis</h3>
+      <input type="file" accept="image/*" onChange={handleFileChange} />
+      <br /><br />
+      <button onClick={handleAnalyze} disabled={!file || uploading}>
+        {uploading ? 'Analyzing...' : 'Analyze Screenshot'}
+      </button>
+
+      {analysis && (
+        <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc' }}>
+          <h4>📊 Analysis Result</h4>
+          <pre>{JSON.stringify(analysis, null, 2)}</pre>
+        </div>
       )}
     </div>
   );

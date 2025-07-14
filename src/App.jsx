@@ -57,9 +57,9 @@ function App() {
         setAnalysis(data);
         setUploading(false);
       })
-      .catch(err => {
-        console.error('Error analyzing image:', err);
+      .catch(() => {
         setUploading(false);
+        alert('Error analyzing screenshot.');
       });
   };
 
@@ -69,33 +69,38 @@ function App() {
       color: "#fff",
       padding: "4px 8px",
       borderRadius: "4px",
-      fontSize: "0.8rem",
+      fontSize: "0.85rem",
       fontWeight: "bold"
     }}>{type}</span>
   );
 
-  const filteredSignals = signals
+  const sortedSignals = signals
     .filter(s => selectedPair === "" || s.pair === selectedPair)
-    .sort((a, b) => b[sortKey] - a[sortKey]);
+    .sort((a, b) => {
+      return sortKey === "confidence"
+        ? b.confidence - a.confidence
+        : new Date(b.timestamp) - new Date(a.timestamp);
+    });
 
   return (
     <div style={{ fontFamily: 'Arial', padding: '40px' }}>
       <h1 style={{ textAlign: 'center' }}>TradeSage FX 📈</h1>
       <p style={{ textAlign: 'center' }}>Smart trading signals with screenshot intelligence</p>
 
-      <div style={{ margin: '20px 0', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
         <label>
           Pair:
-          <select onChange={e => setSelectedPair(e.target.value)} value={selectedPair} style={{ marginLeft: '0.5rem' }}>
+          <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)} style={{ marginLeft: '6px' }}>
             <option value="">All Pairs</option>
             {Array.from(new Set(signals.map(s => s.pair))).map(pair => (
               <option key={pair} value={pair}>{pair}</option>
             ))}
           </select>
         </label>
+
         <label>
           Sort:
-          <select onChange={e => setSortKey(e.target.value)} value={sortKey} style={{ marginLeft: '0.5rem' }}>
+          <select value={sortKey} onChange={e => setSortKey(e.target.value)} style={{ marginLeft: '6px' }}>
             <option value="confidence">Confidence</option>
             <option value="timestamp">Timestamp</option>
           </select>
@@ -111,7 +116,7 @@ function App() {
               <th>Pair</th>
               <th>Timeframe</th>
               <th>Strategy</th>
-              <th>Type</th>
+              <th>Trade Type</th>
               <th>Bias</th>
               <th>Confidence</th>
               <th>Entry</th>
@@ -121,10 +126,10 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {filteredSignals.length === 0 ? (
-              <tr><td colSpan="10" style={{ textAlign: 'center' }}>⚠️ No signals found for current filter.</td></tr>
+            {sortedSignals.length === 0 ? (
+              <tr><td colSpan="10" style={{ textAlign: 'center' }}>⚠️ No signals found.</td></tr>
             ) : (
-              filteredSignals.map((s, i) => (
+              sortedSignals.map((s, i) => (
                 <tr key={i}>
                   <td>{s.pair}</td>
                   <td>{s.timeframe}</td>

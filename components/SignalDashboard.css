@@ -1,6 +1,6 @@
 .dashboard {
-  padding: 1.5rem;
-  max-width: 900px;
+  padding: 2rem;
+  max-width: 1200px;
   margin: auto;
 }
 
@@ -10,15 +10,23 @@
   margin-bottom: 1rem;
 }
 
-.signal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+.filter-bar label {
+  font-weight: bold;
 }
 
-.signal-card {
-  background: #f9f9f9;
+.signal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.signal-table th,
+.signal-table td {
   border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.signal-table th {
+  background-color: #f3f3f3;
+  font-weight: bold;
 }
